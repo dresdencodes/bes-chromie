@@ -1,10 +1,12 @@
 package javascript
 
 import (
+	"context"
+
 	"github.com/chromedp/chromedp"
 )
 
-func SetFrame(chromeCtx *chromedp.Context) error {
+func SetFrame(frameStr string, chromeCtx context.Context) error {
 
 	// defs 
 	var setFrameEval interface{}

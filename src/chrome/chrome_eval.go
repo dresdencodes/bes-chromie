@@ -5,7 +5,7 @@ import (
 	"time"
 	"errors"
 
-	"bes-frame-render/pkg/files"
+	"bes-chromie/pkg/files"
 
 	"github.com/chromedp/chromedp"
 )

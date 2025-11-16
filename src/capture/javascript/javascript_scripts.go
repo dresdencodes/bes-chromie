@@ -1,4 +1,4 @@
-package capture
+package javascript
 
 func JSEnsure() string {
 	return `

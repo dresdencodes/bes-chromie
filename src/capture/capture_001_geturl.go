@@ -1,5 +1,10 @@
 package capture
 
+import (
+	"io"
+	"net/http"
+)
+
 func (c *Capture) GetUrl() error {
 
 	resp, err := http.Get(c.TargetURL)
