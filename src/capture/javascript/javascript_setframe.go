@@ -6,7 +6,7 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
-func SetFrame(frameStr string, chromeCtx context.Context) error {
+func SetFrame(frameStr string, ensureTimes int, chromeCtx context.Context) error {
 
 	// defs 
 	var setFrameEval interface{}
@@ -24,7 +24,7 @@ func SetFrame(frameStr string, chromeCtx context.Context) error {
 	}
 
 	iter := 0
-	for { iter++; if iter > 10 {break}
+	for { iter++; if iter > ensureTimes {break}
 
 		// iter ensure
 		err := chromedp.Run(chromeCtx,

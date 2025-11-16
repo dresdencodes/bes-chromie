@@ -11,7 +11,7 @@ import (
 func (c *Capture) ScrapeConfig() error {
 	
     // defs
-    config := map[string]string{}
+    c.RawConfig = map[string]string{}
     var err error
     
     // new doc 
@@ -23,22 +23,24 @@ func (c *Capture) ScrapeConfig() error {
     // Select meta tags with data-config attribute
     doc.Find("meta[data-config]").Each(func(i int, s *goquery.Selection) {
         key, _ := s.Attr("name")
-        val, _ := s.Attr("content") // or ANY other attribute you want
-        config[key] = val
+        val, _ := s.Attr("content") 
+        c.RawConfig[key] = val
     })
 
     // get int values
-    c.Width, err = validateToInt("width", config)
+    c.Width, err = validateToInt("width", c.RawConfig)
     if err!=nil {return err}
     
-    c.Height, err = validateToInt("height", config)
+    c.Height, err = validateToInt("height", c.RawConfig)
     if err!=nil {return err}
     
-    c.DurationInFrames, err = validateToInt("durationInFrames", config)
+    c.DurationInFrames, err = validateToInt("durationInFrames", c.RawConfig)
     if err!=nil {return err}
     
-    c.FPS, err = validateToInt("fps", config)
+    c.FPS, err = validateToInt("fps", c.RawConfig)
     if err!=nil {return err}
+
+	c.EnsureTimes, _ = validateToInt("ensureTimes", c.RawConfig)
 
     return nil
 
@@ -50,6 +52,8 @@ func validateToInt(target string, config map[string]string) (int, error) {
 	if !ok {
 		return -1, errors.New("config item was missing: " + target)
 	}
+
+	item = strings.ReplaceAll(item, "px", "")
 
 	return strconv.Atoi(item)
 

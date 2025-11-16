@@ -1,5 +1,7 @@
 package capture
+
 import (
+	"strconv"
     "bes-chromie/src/chrome"
 
     "github.com/chromedp/chromedp"
@@ -7,9 +9,17 @@ import (
 )
 
 func (c *Capture) StartChrome() error {
-	
+
+	// parse settings
+	widthStr := strconv.Itoa(c.Width)
+	heightStr := strconv.Itoa(c.Height)
+	size := chromedp.Flag("window-size", widthStr + "," + heightStr)
+
+	// exec opts
+	opts := []*chromedp.ExecAllocatorOption{&size,}
+
 	// chrome instance 
-	chrome, cancelFns := chrome.New()
+	chrome, cancelFns := chrome.NewWithExecAlloc(opts)
 
 	// set cancel fns
 	c.CancelFns = cancelFns
@@ -18,7 +28,7 @@ func (c *Capture) StartChrome() error {
 	err := chromedp.Run(chrome.Context,
 
 		// Set viewport size to 1080x1350
-		emulation.SetDeviceMetricsOverride(1080, 1350, 1.0, false),
+		emulation.SetDeviceMetricsOverride(int64(c.Width), int64(c.Height), 1.0, false),
 		
 		// Navigate and get title
 		chromedp.Navigate(c.TargetURL),
@@ -27,6 +37,9 @@ func (c *Capture) StartChrome() error {
         chromedp.WaitReady("body", chromedp.ByQuery),
 
 	)
+
+	c.Chrome = chrome
+
 	return err
 
 }

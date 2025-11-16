@@ -2,6 +2,7 @@ package capture
 
 import (
 	"log"
+	"time"
 	"bytes"
 	"strconv"
 
@@ -12,8 +13,23 @@ import (
 
 func (cap *Capture) CaptureLoop() error {
 
+	
+	//
+	// first load 5 seconds
+	//	
+	log.Println("first load wait")
+	time.Sleep(time.Duration(8) * time.Second)
+	
+
+
 	// define frame
 	frame := 0
+	lastFrame := cap.DurationInFrames - 1
+	
+	// ensure times
+	if cap.EnsureTimes == 0 {
+		cap.EnsureTimes = 5
+	}
 	
 	for {
 	
@@ -23,16 +39,16 @@ func (cap *Capture) CaptureLoop() error {
 			return err
 		}
 
-		// frame add
-		frame += 1
-		log.Println(frame)
-
 		// frame over 30
-		if frame > cap.DurationInFrames {
+		if frame >= lastFrame {
 			log.Println("Breaker")	
 			break 
 		}
 		
+
+		// frame add
+		frame += 1
+		log.Println(frame)
 
 	}
 
@@ -49,7 +65,7 @@ func (cap *Capture) Screenshot(frame int) error {
 	//
 	// set frame 
 	//
-	err := javascript.SetFrame(frameStr, cap.Chrome.Context)
+	err := javascript.SetFrame(frameStr, cap.EnsureTimes, cap.Chrome.Context)
 	if err != nil {
 		return err
 	}
