@@ -12,8 +12,11 @@ import (
 )
 
 type Capture struct {
+	Width 						int 						`json:"width"`
+	Height						int 						`json:"height"`
 	FPS 						int							`json:"fps"`
 	DurationInFrames 			int 						`json:"duration_in_frames"`
+	
 	TargetURL 					string						`json:"target_url"`
 	HTML						string 						`json:"html"`
 
@@ -30,8 +33,8 @@ func New(targetURL string) (*Capture, error) {
 
 	// define capture fns
 	captureFns := []*CaptureFn{
-		&CaptureStage{Fn:GetUrl},
-		&CaptureStage{Fn:ScrapeVarsAndContext},
+		&CaptureStage{Fn:GetUrl, Name:"Get URL"},
+		&CaptureStage{Fn:ScrapeConfig, Name:"Scrape Config"},
 	}
 
 	// defs
