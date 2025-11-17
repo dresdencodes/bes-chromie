@@ -1,6 +1,7 @@
 package capture 
 
 import (
+	"os"
 	"log"
 	"time"
 	"bytes"
@@ -21,6 +22,13 @@ func (cap *Capture) CaptureLoop() error {
 	time.Sleep(time.Duration(8) * time.Second)
 	
 
+	//
+	// javascript load eval
+	//
+	err := javascript.LoadEval(cap.Chrome.Context)
+	if err!=nil {
+		return err
+	}
 
 	// define frame
 	frame := 0
@@ -90,7 +98,16 @@ func (cap *Capture) Screenshot(frame int) error {
 		return err
 	}
 
-
+	//
+	// os create
+	//
+	f, err := os.Create("test.png")
+    if err != nil {
+        return err
+    }
+    defer f.Close()
+    _, err = f.Write(buf)
+	
 	// Write the screenshot to a PNG file
 	//err = os.WriteFile("./ax/screenshots/screenshot-"+frameStr+".png", buf, 0644)
 	return err

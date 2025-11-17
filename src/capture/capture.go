@@ -49,6 +49,7 @@ func New(targetURL string) (*Capture, error) {
 		&CaptureStage{Fn:cap.CreateEncoder, Name:"Create Encoder"},
 		&CaptureStage{Fn:cap.StartChrome, Name:"Start Chrome"},
 		&CaptureStage{Fn:cap.CaptureLoop, Name:"Start Capture Loop"},
+		&CaptureStage{Fn:cap.FinishEncoder, Name:"Finsih Encoder"},
 	}
 
 	// report start
