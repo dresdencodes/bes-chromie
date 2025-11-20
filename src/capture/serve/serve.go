@@ -6,7 +6,7 @@ import (
 )
 
 // next content to serve
-var serveContent = make(chan string, 10)
+var serveContent = make(chan string, 100)
 
 // next html
 func NextHTML(html string) {
@@ -15,7 +15,6 @@ func NextHTML(html string) {
 
 // get url
 func Run() {
-
 
 	// validate server already running
 	server := &http.Server{Addr: ":11111"}
