@@ -4,6 +4,8 @@ import (
 	"io"
 	"net/url"
 	"net/http"
+
+	"bes-chromie/src/capture/serve"
 )
 
 // get url
@@ -35,6 +37,7 @@ func (c *Capture) GetUrl() error {
 	}
 
 	c.HTML = string(body)
+	captureserve.NextHTML(c.HTML)
 
 	return nil
 

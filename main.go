@@ -4,11 +4,14 @@ import (
 	"log"
 	
 	"bes-chromie/src/capture"
+	"bes-chromie/src/capture/serve"
 )
 
 func main() {
 
-	_, err := capture.New("http://localhost:51480/canvas/realty/hexscroller?with_render=vidynruzfm557mm&preview=true")
+	go captureserve.Run()
+
+	_, err := capture.New("http://149.28.13.238:51480/canvas/realty/hexscroller?with_render=h27trz7s5x8laca")
 	if err!=nil {
 		log.Fatal(err)
 	}

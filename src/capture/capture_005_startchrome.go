@@ -31,13 +31,12 @@ func (c *Capture) StartChrome() error {
 		emulation.SetDeviceMetricsOverride(int64(c.Width), int64(c.Height), 1.0, false),
 		
 		// Navigate and get title
-		chromedp.Navigate(c.TargetURL),
+		chromedp.Navigate("http://localhost:11111"),
 
 		// wait ready
         chromedp.WaitReady("body", chromedp.ByQuery),
 
 	)
-
 	c.Chrome = chrome
 
 	return err

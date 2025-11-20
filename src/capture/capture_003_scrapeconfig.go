@@ -1,6 +1,7 @@
 package capture
 
 import (
+    "log"
 	"errors"
     "strings"
     "strconv"
@@ -26,7 +27,7 @@ func (c *Capture) ScrapeConfig() error {
         val, _ := s.Attr("content") 
         c.RawConfig[key] = val
     })
-
+log.Println("Raw Config - ", c.RawConfig)
     // get int values
     c.Width, err = validateToInt("width", c.RawConfig)
     if err!=nil {return err}

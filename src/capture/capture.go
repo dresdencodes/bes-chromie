@@ -57,13 +57,20 @@ func New(targetURL string) (*Capture, error) {
 	cap.StartTime = time.Now()
 
 	// iter fns
-	for _, capStage := range captureFns {
+	for key, capStage := range captureFns {
+
+		// start
+		log.Println(key, capStage.Name, "Start")
 
 		// run fn
 		err := capStage.Fn()
 		if err!=nil {
 			return cap, err
 		}
+
+		// end
+		log.Println(key, capStage.Name, "End")
+
 
 	}
 	
