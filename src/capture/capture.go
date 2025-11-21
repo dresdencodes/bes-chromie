@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"bes-chromie/src/chrome"
+	"bes-chromie/src/capture/chrome"
 	"bes-chromie/src/capture/encoder"
 
 )

@@ -2,7 +2,7 @@ package capture
 
 import (
 	"strconv"
-    "bes-chromie/src/chrome"
+    "bes-chromie/src/capture/chrome"
 
     "github.com/chromedp/chromedp"
     "github.com/chromedp/cdproto/emulation"
