@@ -1,7 +1,0 @@
-package scraperealtors
-
-func Run() {
-
-	
-
-}
