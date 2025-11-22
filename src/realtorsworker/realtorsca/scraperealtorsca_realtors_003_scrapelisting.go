@@ -2,6 +2,7 @@ package realtorsca
 
 import (
 	"log"
+    "fmt"
 	"time"
 	"errors"
 	"context"
@@ -56,19 +57,21 @@ func (sr *ScrapeRealtors) ScrapeListing(nodes []*cdp.Node) error {
 
 		// open listing tab
 		tabCtx, cancelFn, err := sr.OpenListingTab(node)
-		if err!=nil {
+		if err != nil {
+            log.Println(">>>>>>>>>>>",err)
 			return err
 		}
 
 		// scrape listing
-		err = sr.Listing(tabCtx, node)
-		if err!=nil {
+		cards, err := sr.Realtors(tabCtx, node)
+            log.Println("aaaaaa",err)
+		if err != nil {
 			return err
 		}
 
 		// run cancel fn 
 		cancelFn()
-
+log.Println(cards)
 		break
 
 	}
@@ -78,10 +81,13 @@ func (sr *ScrapeRealtors) ScrapeListing(nodes []*cdp.Node) error {
 
 
 func (sr *ScrapeRealtors) OpenListingTab(node *cdp.Node) (context.Context, func(),  error) {
+
+    // reset target tab id
+    targetTabID = ""
 	
 	var tabCtx context.Context
 	var cancelFn func()
-
+    
 	// click node 
 	err := chromedp.Run(sr.Chrome.Context, chromedp.MouseClickNode(node))
 	if err!=nil {
@@ -92,7 +98,8 @@ func (sr *ScrapeRealtors) OpenListingTab(node *cdp.Node) (context.Context, func(
 	startedAt := time.Now()
 
 	// wait for new tab
-	for targetTabID == "" {
+	for {
+        if string(targetTabID) != "" {break}
 		if time.Since(startedAt) > sr.ActionTimeout {return tabCtx, cancelFn, errors.New("timeout waiting for new tab on scrape listing")}
 		time.Sleep(time.Millisecond * time.Duration(10))
 	}
@@ -104,30 +111,51 @@ func (sr *ScrapeRealtors) OpenListingTab(node *cdp.Node) (context.Context, func(
 }
 
 
-func (sr *ScrapeRealtors) RealtorCards(tabCtx context.Context, node *cdp.Node) error {
+func (sr *ScrapeRealtors) Realtors(tabCtx context.Context, node *cdp.Node) ([]*Realtor, error) {
 
    	
-    var cards []RealtorCard
-    var cardNodes []string
+    var cards []*Realtor
+    var cardNodes []*cdp.Node
 
+log.Println(cardNodes, "-------")
+
+    for {
+
+        // output
+        output := ""
+
+        // wait for realtor card
+        err := chromedp.Run(tabCtx,
+            chromedp.Evaluate(`document.querySelectorAll('.realtorCardCon').length > 0`, &output),
+        )
+        if err != nil {
+            return cards, err
+        }
+
+        log.Println(output)
+
+        // eval
+        if output != "" {break}
+
+    }
+log.Println("realtor card collect")
 	// wait for realtor card
     err := chromedp.Run(tabCtx,
-        chromedp.WaitVisible(`.realtorCardCon`, chromedp.NodeVisible),
         // Get all card outerHTMLs (or you can use NodeIDs)
         chromedp.Nodes(`.realtorCardCon`, &cardNodes, chromedp.ByQueryAll),
     )
     if err != nil {
-        return cards err
+        return cards, err
     }
-
+log.Println(cardNodes)
     // Iterate each card and scrape its content
     for i := range cardNodes {
 
 		// defs 
-        var card RealtorCard
+        var card Realtor
         var socialLinks []map[string]string
 
-        err := chromedp.Run(ctx,
+        err := chromedp.Run(sr.Chrome.Context,
             // Scoped to this card using nth-of-type
             chromedp.Text(fmt.Sprintf(".realtorCardCon:nth-of-type(%d) .realtorCardName", i+1), &card.Name, chromedp.NodeVisible),
             chromedp.Text(fmt.Sprintf(".realtorCardCon:nth-of-type(%d) .realtorCardTitle", i+1), &card.Title, chromedp.NodeVisible),
@@ -160,7 +188,7 @@ func (sr *ScrapeRealtors) RealtorCards(tabCtx context.Context, node *cdp.Node) e
             }
         }
 
-        cards = append(cards, card)
+        cards = append(cards, &card)
     }
 
 	return cards, err

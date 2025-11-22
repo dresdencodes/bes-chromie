@@ -17,7 +17,7 @@ type ScrapeRealtors struct {
 }
 
 
-func (sr *ScrapeRealtors) BuildURL(page int)  string {
+func (sr *ScrapeRealtors) BuildURL(page int, base ...bool)  string {
 	
 	// Base URL
 	u := &url.URL{
@@ -25,6 +25,8 @@ func (sr *ScrapeRealtors) BuildURL(page int)  string {
 		Host:   "www.realtor.ca",
 		Path:   "/map",
 	}
+
+	if len(base) > 0 {return u.String()}
 
 	// Build the fragment parameters (everything after #)
 	frag := url.Values{}
@@ -61,18 +63,22 @@ func Run(geoName string) error {
 		ActionTimeout:time.Second * time.Duration(30),
 	}
 	var deferFn func()
+	var err error
 
 
 	//**
 	//	stage 1 start chrome
 	//**
-	sr.Chrome, deferFn = chrome.New()
+	sr.Chrome, deferFn, err = chrome.New()
 	defer deferFn()
+	if err!=nil {
+		return err
+	}
 
 	//**
 	//	navigate 
 	//**
-	err := sr.NavAndWaitForListings(sr.BuildURL(1), "NAVIGATED AND LISTING CARDS FOUND")
+	err = sr.NavAndWaitForListings(sr.BuildURL(1), "NAVIGATED AND LISTING CARDS FOUND")
 	if err!=nil {
 		return err
 	}
@@ -80,7 +86,7 @@ func Run(geoName string) error {
 	//
 	// get nodes
 	//
-	nodes, err := sr.GetCardNodes()
+	nodes, err := sr.GetCardNodes("CARD NODES SCRAPED")
 	if err!=nil {
 		return err
 	}

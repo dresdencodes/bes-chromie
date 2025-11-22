@@ -1,12 +1,13 @@
 package realtorsca
 
 import (
+	"log"
 
 	"github.com/chromedp/chromedp"
 	"github.com/chromedp/cdproto/cdp"
 )
 
-func (sr *ScrapeRealtors) GetCardNodes() ([]*cdp.Node, error) {
+func (sr *ScrapeRealtors) GetCardNodes(successMessage string) ([]*cdp.Node, error) {
 	var nodes []*cdp.Node
 
 	err := chromedp.Run(sr.Chrome.Context,
@@ -16,6 +17,8 @@ func (sr *ScrapeRealtors) GetCardNodes() ([]*cdp.Node, error) {
 	if err != nil {
 		return nodes, err
 	}
+
+	log.Println(successMessage)
 
 	return nodes, err
 }

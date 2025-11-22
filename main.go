@@ -3,12 +3,17 @@ package main
 import (
 	"log"
 	
+	"bes-chromie/src/chrome"
 	"bes-chromie/src/realtorsworker/realtorsca"
 	"bes-chromie/src/capture"
 	"bes-chromie/src/capture/serve"
 )
 
 func main() {
+
+	chrome.Run("test-profile")
+
+	return
 
 	if false {
 

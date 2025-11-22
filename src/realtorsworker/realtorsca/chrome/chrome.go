@@ -19,21 +19,31 @@ func NewFrom(ctx context.Context) *Chrome {
 	}
 }
 
-func New() (*Chrome, func()) {
+func New() (*Chrome, func(), error) {
 	return NewWithExecAlloc([]*chromedp.ExecAllocatorOption{})
 }
 
-func NewWithExecAlloc(opts []*chromedp.ExecAllocatorOption) (*Chrome, func()) {
+func NewWithExecAlloc(opts []*chromedp.ExecAllocatorOption) (*Chrome, func(), error) {
+	
+	//
+	// Define the path for your custom profile folder
+	//
+	profileDir, removeProfile, err := MakeProfile()
+	if err!=nil {
+		return nil, func(){}, err
+	} 
 
 	//
 	// define new opts
 	//
 	optsCombined := append(
 		chromedp.DefaultExecAllocatorOptions[:],
-		//chromedp.Flag("window-size", "1080,1350"),
-		chromedp.Flag("incognito", true),
+		chromedp.Flag("window-size", "1920,1080"),
+		//chromedp.Flag("incognito", true),
 		chromedp.Flag("headless", false),
+		chromedp.UserDataDir(profileDir),
 	)
+
 
 	//
 	// iter opts
@@ -60,5 +70,6 @@ func NewWithExecAlloc(opts []*chromedp.ExecAllocatorOption) (*Chrome, func()) {
 	}, func() {
 		cancelBrowser()
 		cancel()
-	}
+		removeProfile()
+	}, nil
 }
