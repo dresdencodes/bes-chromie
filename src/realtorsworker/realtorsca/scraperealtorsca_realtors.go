@@ -1,32 +1,47 @@
-package realtors
+package realtorsca
 
 import (
+	"time"
+	"net/url"
+	"strconv"
+
 	"bes-chromie/src/realtorsworker/realtorsca/chrome"
 )
 
 type ScrapeRealtors struct {
 
-	City 			string 	
+	GeoName 		string 	
 	Page 			int
+	ActionTimeout 	time.Duration
 	Chrome 			*chrome.Chrome
-
 }
 
 
-func (sr *ScrapeRealtors) BuildURL()  string {
-
-	// create url
+func (sr *ScrapeRealtors) BuildURL(page int)  string {
+	
+	// Base URL
 	u := &url.URL{
 		Scheme: "https",
 		Host:   "www.realtor.ca",
-		Path:   "/realtor-search-results",
+		Path:   "/map",
 	}
 
-	// Build fragment parameters
+	// Build the fragment parameters (everything after #)
 	frag := url.Values{}
-	frag.Set("city", sr.City)
-	frag.Set("page", strconv.Itoa(sr.Page))
-	frag.Set("sort", "11-A")
+	
+	//frag.Set("Center", "51.028188,-114.086920")
+	//frag.Set("LatitudeMax", "51.31062")
+	//frag.Set("LongitudeMax", "-113.46276")
+	//frag.Set("LatitudeMin", "50.74402")
+	//frag.Set("LongitudeMin", "-114.71108")
+	frag.Set("view", "list")
+	frag.Set("CurrentPage", strconv.Itoa(page))
+	//frag.Set("Sort", "6-D")
+	//frag.Set("PGeoIds", "g30_c3nfkdtg")
+	frag.Set("GeoName", sr.GeoName)
+	frag.Set("PropertyTypeGroupID", "1")
+	frag.Set("PropertySearchTypeId", "0")
+	//frag.Set("Currency", "CAD")
 
 	// Assign encoded fragment
 	u.Fragment = frag.Encode()
@@ -36,15 +51,17 @@ func (sr *ScrapeRealtors) BuildURL()  string {
 }
 
 
-func Run(city string) {
+func Run(geoName string) error {
 
 	//
 	// defs
 	//
 	sr := &ScrapeRealtors{
-		City:city,
+		GeoName:geoName,
+		ActionTimeout:time.Second * time.Duration(30),
 	}
 	var deferFn func()
+
 
 	//**
 	//	stage 1 start chrome
@@ -52,4 +69,29 @@ func Run(city string) {
 	sr.Chrome, deferFn = chrome.New()
 	defer deferFn()
 
+	//**
+	//	navigate 
+	//**
+	err := sr.NavAndWaitForListings(sr.BuildURL(1), "NAVIGATED AND LISTING CARDS FOUND")
+	if err!=nil {
+		return err
+	}
+
+	//
+	// get nodes
+	//
+	nodes, err := sr.GetCardNodes()
+	if err!=nil {
+		return err
+	}
+
+	//**
+	//  find acceptiable listing
+	//**
+	err = sr.ScrapeListing(nodes)
+	if err!=nil {
+		return err
+	}
+
+	return nil
 }
