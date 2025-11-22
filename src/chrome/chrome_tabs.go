@@ -1,6 +1,6 @@
 package chrome
 
-
+/*
 func ListTabs(ctx context.Context) ([]*target.TargetInfo, error) {
     infos, err := target.GetTargets().Do(ctx)
     if err != nil {
@@ -25,3 +25,4 @@ func NewTab(ctx context.Context, url string) (context.Context, error) {
     tabCtx, _ := chromedp.NewContext(ctx, chromedp.WithTargetID(target.ID(tid)))
     return tabCtx, nil
 }
+*/

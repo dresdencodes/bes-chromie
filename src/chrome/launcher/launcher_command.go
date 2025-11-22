@@ -1,56 +1,52 @@
 package launcher
 
 import (
-	"io"
 	"fmt"
 	"os/exec"
+	"runtime"
+	"syscall"
 )
 
-func launchChrome(opts *LaunchOpts) (*exec.Cmd, error) {
+func launchChrome(opts *LaunchOpts) error {
 
-	// define args
 	args := []string{
-		"--remote-debugging-port="+remoteDebugPort,
-		"--user-data-dir="+opts.UserDataDir,
+		"--remote-debugging-port=" + remoteDebugPort,
+		"--user-data-dir=" + opts.UserDataDir,
 		"--disable-popup-blocking",
 		"--disable-infobars",
 		"--no-first-run",
 		"--no-default-browser-check",
 	}
 
-	
 	if opts.NordVPNExtensionID != "" {
-		args = append(args, "--load-extension=" + opts.NordVPNExtensionID)
+		args = append(args, "--load-extension="+opts.NordVPNExtensionID)
 	}
 
-	// if windows
+	var cmd *exec.Cmd
+
 	if runtime.GOOS == "windows" {
+		fmt.Println("Launching Chrome (Windows detached)...")
+		cmd = exec.Command("chrome.exe", args...)
 
-		fmt.Println("Launching Chrome (Windows)...")
+		// Detach from parent process
+		cmd.SysProcAttr = &syscall.SysProcAttr{
+			CreationFlags: syscall.CREATE_NEW_PROCESS_GROUP | syscall.DETACHED_PROCESS,
+		}
+	} else {
+		// Linux/macOS
+		fmt.Println("Launching Chrome (Linux/macOS detached)...")
+		cmd = exec.Command("google-chrome", args...)
 
-		// exec command
-		cmd := exec.Command(
-			"chrome.exe",
-			...args,
-		)
-
-		// hide console window
-		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		return cmd.Start(), cmd
+		// Detach process
+		cmd.SysProcAttr = &syscall.SysProcAttr{
+			Setsid: true,
+		}
 	}
 
-	// LINUX DEFAULT
-	fmt.Println("Launching Chrome (Linux)...")
+	// Optional: redirect stdout/stderr to null to prevent blocking
+	cmd.Stdout = nil
+	cmd.Stderr = nil
 
-	// define cmd
-	cmd := exec.Command(
-		"google-chrome",
-		...args,
-	)
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Start(), cmd
+	// Start the process and immediately return
+	return cmd.Start()
 }
