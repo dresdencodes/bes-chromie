@@ -7,6 +7,7 @@ import (
 
     "github.com/chromedp/chromedp"
 )
+
 type VPNInfo struct {
     IP        string
     ISP       string
