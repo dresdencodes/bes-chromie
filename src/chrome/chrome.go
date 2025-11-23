@@ -15,7 +15,7 @@ type ChromeInstance struct {
 }
 
 
-func Run(target string) {
+func Run(target string) (*ChromeInstance, error) {
     
 	instance := &ChromeInstance{}
 	var err error
@@ -26,13 +26,8 @@ func Run(target string) {
 
     instance.Launch, instance.Ctx, err = launcher.Start(instance.LaunchOpts)
 	if err!=nil {
-		log.Fatal(err)
+		return instance, err
 	}
-	_, _ = instance.NewTab()
-	tabs, err := instance.ListTabs()
-	log.Println(tabs, err)
-	
-	info, err := instance.ValidateNordVPN()
-	log.Println(info, err)
-	
+
+	return instance, err
 }
