@@ -4,10 +4,10 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  bin = "./tmp/main"
-  cmd = "rm ./tmp/main; go build -o ./tmp/main ."
+  bin = "tmp\\main.exe"
+  cmd = "go build -o ./tmp/main.exe ."
   delay = 1000
-  exclude_dir = ["assets", "tmp", "vendor", "testdata"]
+  exclude_dir = ["ax", "assets", "tmp", "vendor", "testdata"]
   exclude_file = []
   exclude_regex = ["_test.go"]
   exclude_unchanged = false
@@ -36,7 +36,6 @@ tmp_dir = "tmp"
 
 [log]
   main_only = false
-  silent = false
   time = false
 
 [misc]

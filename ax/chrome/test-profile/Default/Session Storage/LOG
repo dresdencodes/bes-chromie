@@ -1,3 +1,9 @@
-2025/11/22-13:44:35.288 5 Reusing MANIFEST /home/dresden/go/src/bes-chromie/ax/chrome/test-profile/Default/Session Storage/MANIFEST-000001
-2025/11/22-13:44:35.289 5 Recovering log #3
-2025/11/22-13:44:35.290 5 Reusing old log /home/dresden/go/src/bes-chromie/ax/chrome/test-profile/Default/Session Storage/000003.log 
+2025/11/22-17:47:18.506 3234 Reusing MANIFEST C:\Users\Ian\go\src\bes-chromie\ax\chrome\test-profile\Default\Session Storage/MANIFEST-000001
+2025/11/22-17:47:18.507 3234 Recovering log #3
+2025/11/22-17:47:18.510 3234 Reusing old log C:\Users\Ian\go\src\bes-chromie\ax\chrome\test-profile\Default\Session Storage/000003.log 
+2025/11/22-17:47:30.178 327c Level-0 table #5: started
+2025/11/22-17:47:30.185 327c Level-0 table #5: 43998 bytes OK
+2025/11/22-17:47:30.188 327c Delete type=0 #3
+2025/11/22-17:48:03.446 327c Level-0 table #7: started
+2025/11/22-17:48:03.465 327c Level-0 table #7: 30290 bytes OK
+2025/11/22-17:48:03.488 327c Delete type=0 #4

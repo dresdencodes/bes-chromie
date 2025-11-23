@@ -1,16 +1,38 @@
 package chrome
 
 import (
-    "time"
+	"log"
+	"context"
+
     "bes-chromie/src/chrome/launcher"
 )
 
-const nordVPNExtID = "your_nordvpn_extension_id_here"
+
+type ChromeInstance struct {
+	Ctx 				context.Context
+	Launch				*launcher.Launch
+	LaunchOpts			*launcher.LaunchOpts
+}
+
 
 func Run(target string) {
     
-    launcher.Start(&launcher.LaunchOpts{
+	instance := &ChromeInstance{}
+	var err error
+
+	instance.LaunchOpts = &launcher.LaunchOpts{
         UserDataDir:"./ax/chrome/"+target,
-    })
-time.Sleep(100000 * time.Second)
+    }
+
+    instance.Launch, instance.Ctx, err = launcher.Start(instance.LaunchOpts)
+	if err!=nil {
+		log.Fatal(err)
+	}
+	_, _ = instance.NewTab()
+	tabs, err := instance.ListTabs()
+	log.Println(tabs, err)
+	
+	info, err := instance.ValidateNordVPN()
+	log.Println(info, err)
+	
 }

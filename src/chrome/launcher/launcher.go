@@ -1,66 +1,72 @@
 package launcher
 
 import (
-	"log"
-	"errors"
-	"os/exec"
-	"context"
-	"io/ioutil"
-	"encoding/json"
 	"fmt"
-	"net/http"
-	"time"
+	"log"
+	"context"
+	"path/filepath"
 
 	"github.com/chromedp/chromedp"
 )
 
-const (
-	debugURL         = "http://localhost:9222/json/version"
-	extensionPath    = "/path/to/extensions/nordvpn"
-	remoteDebugPort  = "9222"
-)
-
 type Launch struct {
-	Ctx 			context.Context
 	Cancel 			func()
 }
 
 type LaunchOpts struct {
-	UserDataDir 		string
-	NordVPNExtensionID 	string
+	UserDataDir 				string
+	NordVPNExtensionID 			string
+	RemoteDebugPort				string
 }
 
-func Start(opts *LaunchOpts) (*Launch, error) {
+func Start(opts *LaunchOpts) (*Launch, context.Context, error) {
 
 	//
 	// defs
 	//
 	var err error
+	var ctx context.Context
 	launch := &Launch{}
 
 	//
+	// eval
+	//
+	if opts.RemoteDebugPort == "" {opts.RemoteDebugPort = "9222"}
+
+	// full path
+	opts.UserDataDir, err = filepath.Abs(opts.UserDataDir)
+	if err != nil {
+		return launch, nil, err
+	}
+	//
 	// run chrome if needed
 	// 
-	if !isChromeRunning() {
+	if !isChromeRunning(opts.RemoteDebugPort) {
 		fmt.Println("Chrome not detected, launching...")
-		err = launchChrome(opts)
+		err = launchWindows(opts)
 		if err != nil {
-			return nil, err
+			log.Fatal(err)
 		}
-		waitForChrome()
+		waitForChrome(opts.RemoteDebugPort)
 	} else {
 		fmt.Println("Chrome already running.")
+		waitForChrome(opts.RemoteDebugPort)
 	}
 
-	// 
+	//
+	// get 
+	//
+	output, err := getChromeOutput(opts.RemoteDebugPort)
+	if err!=nil {
+		return nil, ctx, err
+	}
 
-	// 2. Attach chromedp to the running Chrome instance
-	allocatorCtx, cancel1 := chromedp.NewRemoteAllocator(context.Background(), "http://localhost:9222/json")
+	//
+	// attach 
+	// 
+	allocatorCtx, cancel1 := chromedp.NewRemoteAllocator(context.Background(), output.WebSocketDebuggerURL)
 
 	ctx, cancel2 := chromedp.NewContext(allocatorCtx)
-
-	// set context
-	launch.Ctx = ctx
 
 	// set cancel
 	launch.Cancel = func(){
@@ -68,54 +74,5 @@ func Start(opts *LaunchOpts) (*Launch, error) {
 		cancel2()
 	}
 
-	return launch, err
-}
-
-func waitForChrome() error {
-	start := time.Now()
-	for {
-		if isChromeRunning() {
-			log.Println("Wait for chrome success")
-
-			output, err := getChromeOutput()
-			log.Println(output, err)
-
-			return nil
-		}
-		if time.Since(start) > time.Duration(10) * time.Second {return errors.New("starting chrome timed out")}
-	}
-	return nil
-}
-
-func isChromeRunning() bool {
-	client := http.Client{Timeout: 100 * time.Millisecond}
-	_, err := client.Get(debugURL)
-	return err == nil
-}
-
-func getChromeOutput() (interface{}, error) {
-	client := http.Client{Timeout: 100 * time.Millisecond}
-
-	resp, err := client.Get(debugURL)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status: %s", resp.Status)
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	// Optional: validate it's valid JSON
-	var js interface{}
-	if err := json.Unmarshal(body, &js); err != nil {
-		return nil, fmt.Errorf("invalid JSON: %w", err)
-	}
-
-	return string(body), nil
+	return launch, ctx, err
 }

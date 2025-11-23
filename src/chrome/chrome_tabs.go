@@ -1,28 +1,34 @@
 package chrome
 
-/*
-func ListTabs(ctx context.Context) ([]*target.TargetInfo, error) {
-    infos, err := target.GetTargets().Do(ctx)
+
+import (
+    "context"
+    "github.com/chromedp/chromedp"
+    "github.com/chromedp/cdproto/target"
+)
+
+func (c *ChromeInstance) ListTabs() ([]*target.Info, error) {
+
+  	// Get all targets (tabs, extensions, etc.)
+    infos, err := chromedp.Targets(c.Ctx)
     if err != nil {
-        return nil, err
+		return infos, err
     }
 
-    var tabs []*target.TargetInfo
+    var tabs []*target.Info
     for _, t := range infos {
-        if t.Type == "page" {
+        // Filter only page tabs with valid URLs
+        if t.Type == "page" && t.URL != "" {
             tabs = append(tabs, t)
         }
     }
+
     return tabs, nil
 }
 
-func NewTab(ctx context.Context, url string) (context.Context, error) {
-    tid, err := target.CreateTarget(url).Do(ctx)
-    if err != nil {
-        return nil, err
-    }
-
-    tabCtx, _ := chromedp.NewContext(ctx, chromedp.WithTargetID(target.ID(tid)))
-    return tabCtx, nil
+func (c *ChromeInstance) NewTab() (context.Context, func()) {
+	// --- Create a new tab from the existing context ---
+	// NewContext creates a child context that reuses the existing browser but targets a new tab
+	newTabCtx, cancelNewTab := chromedp.NewContext(c.Ctx)
+	return newTabCtx, cancelNewTab
 }
-*/
